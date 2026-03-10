@@ -4,6 +4,15 @@ A simple and powerful desktop time tracker for tracking time spent on various ta
 
 [Русская версия (Russian version)](README_RU.md)
 
+<p align="center">
+  <img src="screenshots/timer.png" width="800" alt="Timer Screen">
+</p>
+
+<p align="center">
+  <img src="screenshots/history.png" width="400" alt="History">
+  <img src="screenshots/stats.png" width="400" alt="Statistics">
+</p>
+
 ## Features
 
 ### 1. Time Tracking

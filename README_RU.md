@@ -4,6 +4,15 @@
 
 [English version (Английская версия)](README.md)
 
+<p align="center">
+  <img src="screenshots/timer.png" width="800" alt="Timer Screen">
+</p>
+
+<p align="center">
+  <img src="screenshots/history.png" width="400" alt="History">
+  <img src="screenshots/stats.png" width="400" alt="Statistics">
+</p>
+
 ## Функционал
 
 ### 1. Учет времени
