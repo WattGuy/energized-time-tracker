@@ -100,7 +100,8 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
         tomlMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         String localAppData = System.getenv("LOCALAPPDATA");
-        if (localAppData == null) localAppData = System.getProperty("user.home");
+        if (localAppData == null)
+            localAppData = System.getProperty("user.home");
         dataRoot = Paths.get(localAppData, "TimeTracker", "data");
         settingsPath = Paths.get(localAppData, "TimeTracker", "settings.toml");
 
@@ -161,8 +162,10 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
         tabbedPane.addTab("", statsPanel);
 
         tabbedPane.addChangeListener(e -> {
-            if (tabbedPane.getSelectedComponent() == historyPanel) historyPanel.refreshData();
-            else if (tabbedPane.getSelectedComponent() == statsPanel) statsPanel.refresh();
+            if (tabbedPane.getSelectedComponent() == historyPanel)
+                historyPanel.refreshData();
+            else if (tabbedPane.getSelectedComponent() == statsPanel)
+                statsPanel.refresh();
         });
 
         add(tabbedPane);
@@ -253,9 +256,11 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (currentActiveSession != null) stopSession();
+                if (currentActiveSession != null)
+                    stopSession();
                 saveTodayData();
             }
+
             @Override
             public void windowIconified(WindowEvent e) {
                 setVisible(false);
@@ -358,42 +363,48 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
     }
 
     private void toggleSession() {
-        if (currentActiveSession == null) startSession();
-        else stopSession();
+        if (currentActiveSession == null)
+            startSession();
+        else
+            stopSession();
     }
 
     private void startSession() {
         String baseNote = noteField.getText().trim();
-        if (baseNote.isEmpty()) baseNote = LanguageManager.get("timer.note.default");
+        if (baseNote.isEmpty())
+            baseNote = LanguageManager.get("timer.note.default");
 
         LocalDate today = LocalDate.now();
         String finalBaseNote = baseNote;
         long count = allSessions.stream()
-            .filter(s -> s.getDate().equals(today) && s.getNote().startsWith(finalBaseNote))
-            .count();
+                .filter(s -> s.getDate().equals(today) && s.getNote().startsWith(finalBaseNote))
+                .count();
 
         String finalNote = (count > 0) ? baseNote + " (" + (count + 1) + ")" : baseNote;
 
         currentActiveSession = new Session(LocalDateTime.now(), null, finalNote);
+        allSessions.add(currentActiveSession);
         lastActivityTime = System.currentTimeMillis();
         isAfk = false;
 
         updateUIState(true);
+        saveTodayData();
         showNotification(LanguageManager.get("notification.timer_started.title"), finalNote, true);
         updateTrayTooltip();
     }
 
     private void stopSession() {
-        if (currentActiveSession == null) return;
+        if (currentActiveSession == null)
+            return;
 
         currentActiveSession.setEnd(LocalDateTime.now());
-        allSessions.add(currentActiveSession);
         updateProjectNameCache();
         currentActiveSession = null;
 
         updateUIState(false);
         saveTodayData();
-        showNotification(LanguageManager.get("notification.timer_stopped.title"), LanguageManager.get("notification.timer_stopped.message"), false);
+        showNotification(LanguageManager.get("notification.timer_stopped.title"),
+                LanguageManager.get("notification.timer_stopped.message"), false);
         updateTrayTooltip();
     }
 
@@ -401,12 +412,14 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
         if (running) {
             toggleButton.setText(LanguageManager.get("timer.button.stop"));
             toggleButton.setBackground(STOP_COLOR);
-            statusLabel.setText(String.format(LanguageManager.get("timer.status.in_progress"), currentActiveSession.getNote()));
+            statusLabel.setText(
+                    String.format(LanguageManager.get("timer.status.in_progress"), currentActiveSession.getNote()));
             statusLabel.setForeground(new Color(100, 200, 100));
             noteField.setEnabled(false);
             afkSpinner.setEnabled(false);
             updateTrayMenu(LanguageManager.get("tray.menu.stop"));
-            if (trayIcon != null) trayIcon.setImage(createTrayIcon(true));
+            if (trayIcon != null)
+                trayIcon.setImage(createTrayIcon(true));
         } else {
             toggleButton.setText(LanguageManager.get("timer.button.start"));
             toggleButton.setBackground(ACCENT_COLOR);
@@ -417,7 +430,8 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
             noteField.setEnabled(true);
             afkSpinner.setEnabled(true);
             updateTrayMenu(LanguageManager.get("tray.menu.start"));
-            if (trayIcon != null) trayIcon.setImage(createTrayIcon(false));
+            if (trayIcon != null)
+                trayIcon.setImage(createTrayIcon(false));
         }
     }
 
@@ -431,15 +445,18 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
                     .mapToLong(Session::getDurationSeconds)
                     .sum() + seconds;
 
-            detailsLabel.setText(String.format(LanguageManager.get("timer.details.start"), currentActiveSession.getStart().format(timeFormatter))
-                    + "  |  " + String.format(LanguageManager.get("timer.details.total_today"), TimeUtil.formatDuration(todayTotal)));
+            detailsLabel.setText(String.format(LanguageManager.get("timer.details.start"),
+                    currentActiveSession.getStart().format(timeFormatter))
+                    + "  |  " + String.format(LanguageManager.get("timer.details.total_today"),
+                            TimeUtil.formatDuration(todayTotal)));
 
             updateTrayTooltip();
         }
     }
 
     private void checkAfk() {
-        if (currentActiveSession == null || isAfk) return;
+        if (currentActiveSession == null || isAfk)
+            return;
         long idleMillis = System.currentTimeMillis() - lastActivityTime;
         int limit = (int) afkSpinner.getValue();
         if (idleMillis > limit * 60 * 1000L) {
@@ -483,7 +500,8 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
 
     private void loadAllData() {
         allSessions.clear();
-        if (!Files.exists(dataRoot)) return;
+        if (!Files.exists(dataRoot))
+            return;
 
         try (Stream<Path> days = Files.list(dataRoot)) {
             days.filter(Files::isDirectory).forEach(dayDir -> {
@@ -502,22 +520,35 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        for (Session s : allSessions) {
+            if (s.getEnd() == null) {
+                currentActiveSession = s;
+                lastActivityTime = System.currentTimeMillis();
+            }
+        }
     }
 
     private void setupSystemTray() {
-        if (!SystemTray.isSupported()) return;
+        if (!SystemTray.isSupported())
+            return;
         tray = SystemTray.getSystemTray();
 
         trayPopupMenu = new PopupMenu();
         openTrayItem = new MenuItem();
-        openTrayItem.addActionListener(e -> { setVisible(true); setExtendedState(NORMAL); toFront(); });
+        openTrayItem.addActionListener(e -> {
+            setVisible(true);
+            setExtendedState(NORMAL);
+            toFront();
+        });
 
         toggleTrayItem = new MenuItem();
         toggleTrayItem.addActionListener(e -> SwingUtilities.invokeLater(this::toggleSession));
 
         exitTrayItem = new MenuItem();
         exitTrayItem.addActionListener(e -> {
-            if (currentActiveSession != null) stopSession();
+            if (currentActiveSession != null)
+                stopSession();
             saveTodayData();
             System.exit(0);
         });
@@ -529,16 +560,26 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
 
         trayIcon = new TrayIcon(createTrayIcon(false), LanguageManager.get("app.title"), trayPopupMenu);
         trayIcon.setImageAutoSize(true);
-        trayIcon.addActionListener(e -> { setVisible(true); setExtendedState(NORMAL); toFront(); });
+        trayIcon.addActionListener(e -> {
+            setVisible(true);
+            setExtendedState(NORMAL);
+            toFront();
+        });
 
-        try { tray.add(trayIcon); } catch (AWTException e) { e.printStackTrace(); }
+        try {
+            tray.add(trayIcon);
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
         updateTrayTexts();
     }
 
     private void updateTrayTexts() {
-        if (tray == null) return;
+        if (tray == null)
+            return;
         openTrayItem.setLabel(LanguageManager.get("tray.menu.open"));
-        toggleTrayItem.setLabel(LanguageManager.get(currentActiveSession == null ? "tray.menu.start" : "tray.menu.stop"));
+        toggleTrayItem
+                .setLabel(LanguageManager.get(currentActiveSession == null ? "tray.menu.start" : "tray.menu.stop"));
         exitTrayItem.setLabel(LanguageManager.get("tray.menu.exit"));
         updateTrayTooltip();
     }
@@ -550,7 +591,8 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
     }
 
     private void updateTrayTooltip() {
-        if (trayIcon == null) return;
+        if (trayIcon == null)
+            return;
         if (currentActiveSession != null) {
             long seconds = Duration.between(currentActiveSession.getStart(), LocalDateTime.now()).getSeconds();
             String tooltip = String.format(LanguageManager.get("tray.tooltip.in_progress"),
@@ -563,31 +605,67 @@ public class Main extends JFrame implements NativeKeyListener, NativeMouseInputL
     }
 
     private void showNotification(String title, String message, boolean isStart) {
-        if (isActive() && isVisible()) return;
+        if (isActive() && isVisible())
+            return;
 
         new ToastNotification(title, message, isStart).showToast();
     }
 
     private void setupGlobalHooks() {
         Logger.getLogger(GlobalScreen.class.getPackage().getName()).setLevel(Level.OFF);
-        try { GlobalScreen.registerNativeHook(); } catch (NativeHookException e) { System.exit(1); }
+        try {
+            GlobalScreen.registerNativeHook();
+        } catch (NativeHookException e) {
+            System.exit(1);
+        }
         GlobalScreen.addNativeKeyListener(this);
         GlobalScreen.addNativeMouseListener(this);
         GlobalScreen.addNativeMouseMotionListener(this);
     }
-    @Override public void nativeKeyPressed(NativeKeyEvent e) {
+
+    @Override
+    public void nativeKeyPressed(NativeKeyEvent e) {
         updateActivity();
-        if (e.getKeyCode() == NativeKeyEvent.VC_T && (e.getModifiers() & NativeKeyEvent.CTRL_MASK) != 0 && (e.getModifiers() & NativeKeyEvent.SHIFT_MASK) != 0) {
+        if (e.getKeyCode() == NativeKeyEvent.VC_T && (e.getModifiers() & NativeKeyEvent.CTRL_MASK) != 0
+                && (e.getModifiers() & NativeKeyEvent.SHIFT_MASK) != 0) {
             SwingUtilities.invokeLater(this::toggleSession);
         }
     }
-    @Override public void nativeKeyReleased(NativeKeyEvent e) { updateActivity(); }
-    @Override public void nativeKeyTyped(NativeKeyEvent e) { updateActivity(); }
-    @Override public void nativeMouseClicked(NativeMouseEvent e) { updateActivity(); }
-    @Override public void nativeMousePressed(NativeMouseEvent e) { updateActivity(); }
-    @Override public void nativeMouseReleased(NativeMouseEvent e) { updateActivity(); }
-    @Override public void nativeMouseMoved(NativeMouseEvent e) { updateActivity(); }
-    @Override public void nativeMouseDragged(NativeMouseEvent e) { updateActivity(); }
+
+    @Override
+    public void nativeKeyReleased(NativeKeyEvent e) {
+        updateActivity();
+    }
+
+    @Override
+    public void nativeKeyTyped(NativeKeyEvent e) {
+        updateActivity();
+    }
+
+    @Override
+    public void nativeMouseClicked(NativeMouseEvent e) {
+        updateActivity();
+    }
+
+    @Override
+    public void nativeMousePressed(NativeMouseEvent e) {
+        updateActivity();
+    }
+
+    @Override
+    public void nativeMouseReleased(NativeMouseEvent e) {
+        updateActivity();
+    }
+
+    @Override
+    public void nativeMouseMoved(NativeMouseEvent e) {
+        updateActivity();
+    }
+
+    @Override
+    public void nativeMouseDragged(NativeMouseEvent e) {
+        updateActivity();
+    }
 
     public static void main(String[] args) {
         FlatDarkLaf.setup();

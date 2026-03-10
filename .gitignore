@@ -37,7 +37,6 @@ Thumbs.db
 *.tmp
 *.bak
 
-# Project specific (local data/settings)
-# If you want to keep your local data out of Git:
-# data/
-# settings.toml
+gradlew
+gradlew.bat
+/gradle/
